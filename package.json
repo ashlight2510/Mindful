@@ -1,7 +1,7 @@
 {
   "name": "mindful-today",
   "version": "1.0.0",
-  "description": "오늘의 인생명언 웹서비스",
+  "description": "오늘의 마음챙김 웹서비스",
   "scripts": {
     "dev": "serve -s . -l 3000",
     "start": "serve -s . -l 3000"

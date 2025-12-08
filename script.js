@@ -1028,7 +1028,7 @@ function getQuoteByMood(mood) {
 // 동적 SEO 메타 태그 업데이트
 function updateSEOMetaTags(quote) {
     const quoteText = quote.text.length > 100 ? quote.text.substring(0, 100) + '...' : quote.text;
-    const title = `"${quoteText}" — ${quote.author} | 오늘의 인생명언`;
+    const title = `"${quoteText}" — ${quote.author} | 오늘의 마음챙김`;
     const description = `${quoteText} — ${quote.author}. ${quote.comment}`;
     
     // 페이지 타이틀 업데이트
@@ -1232,37 +1232,371 @@ function copyUrl() {
     });
 }
 
-// 공유하기 (Web Share API)
-function shareQuote() {
+// 공유용 썸네일 이미지 생성 (OG 이미지용)
+function createShareThumbnail(width = 1200, height = 630) {
     const quote = {
         text: document.getElementById('quoteText').textContent,
-        author: document.getElementById('quoteAuthor').textContent
+        author: document.getElementById('quoteAuthor').textContent.replace('— ', ''),
+        comment: document.getElementById('quoteComment').textContent
     };
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
     
-    const shareData = {
-        title: '오늘의 인생명언',
-        text: `"${quote.text}" ${quote.author}`,
-        url: window.location.href
+    canvas.width = width;
+    canvas.height = height;
+    
+    // 배경 그라데이션
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#fafafa');
+    gradient.addColorStop(1, '#f5f1eb');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // 중앙 카드
+    const cardWidth = width * 0.85;
+    const cardHeight = height * 0.75;
+    const cardX = (width - cardWidth) / 2;
+    const cardY = (height - cardHeight) / 2;
+    
+    // 카드 배경
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 20);
+    ctx.fill();
+    
+    // 카드 그림자 효과
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 10;
+    
+    // 여백
+    const padding = width * 0.08;
+    const maxWidth = cardWidth - (padding * 2);
+    let y = cardY + padding + 60;
+    
+    // 명언 텍스트
+    ctx.fillStyle = '#2c3e50';
+    ctx.shadowColor = 'transparent';
+    ctx.font = `bold ${width * 0.04}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    
+    const textLines = wrapText(ctx, quote.text, maxWidth);
+    textLines.forEach((line) => {
+        ctx.fillText(line, width / 2, y);
+        y += width * 0.05;
+    });
+    
+    // 저자
+    y += width * 0.03;
+    ctx.fillStyle = '#8b6f47';
+    ctx.font = `italic ${width * 0.025}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.fillText(`— ${quote.author}`, width / 2, y);
+    
+    // 서비스명
+    y = cardY + cardHeight - padding - 40;
+    ctx.fillStyle = '#7f8c8d';
+    ctx.font = `${width * 0.018}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Mindful Today - 오늘의 마음챙김', width / 2, y);
+    
+    return canvas.toDataURL('image/png');
+}
+
+// roundRect 폴리필 (이미 있으면 스킵)
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.lineTo(x + width - radius, y);
+        this.quadraticCurveTo(x + width, y, x + width, y + radius);
+        this.lineTo(x + width, y + height - radius);
+        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        this.lineTo(x + radius, y + height);
+        this.quadraticCurveTo(x, y + height, x, y + height - radius);
+        this.lineTo(x, y + radius);
+        this.quadraticCurveTo(x, y, x + radius, y);
+        this.closePath();
     };
+}
+
+// 공유 모달 열기
+function openShareModal() {
+    const modal = document.getElementById('shareModal');
+    const thumbnail = document.getElementById('shareThumbnail');
+    const shareText = document.getElementById('shareText');
     
-    if (navigator.share) {
-        navigator.share(shareData).catch((error) => {
-            console.log('공유 실패:', error);
-        });
-    } else {
-        // Web Share API 미지원 시 URL 복사로 대체
-        copyUrl();
+    // 썸네일 생성
+    const thumbnailUrl = createShareThumbnail();
+    thumbnail.src = thumbnailUrl;
+    
+    // 공유 문구 생성
+    const quote = {
+        text: document.getElementById('quoteText').textContent,
+        author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
+    };
+    const shareTextContent = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today\n${window.location.href}`;
+    shareText.textContent = shareTextContent;
+    
+    // Open Graph 이미지 업데이트
+    updateOGTag('og:image', thumbnailUrl);
+    
+    // 모달 표시
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+// 공유 모달 닫기
+function closeShareModal() {
+    const modal = document.getElementById('shareModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// 카카오톡 공유
+function shareKakao() {
+    const quote = {
+        text: document.getElementById('quoteText').textContent,
+        author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
+    };
+    const url = window.location.href;
+    const thumbnail = document.getElementById('shareThumbnail').src;
+    
+    // 카카오톡 링크 공유 (카카오 SDK 필요)
+    const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`;
+    window.open(kakaoUrl, '_blank');
+}
+
+// 인스타그램용 이미지 저장 (정사각형)
+function shareInstagram() {
+    const quote = {
+        text: document.getElementById('quoteText').textContent,
+        author: document.getElementById('quoteAuthor').textContent.replace('— ', ''),
+        comment: document.getElementById('quoteComment').textContent
+    };
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 인스타그램 권장 크기: 1080x1080
+    canvas.width = 1080;
+    canvas.height = 1080;
+    
+    // 배경 그라데이션
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#fafafa');
+    gradient.addColorStop(1, '#f5f1eb');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 중앙 카드
+    const cardWidth = canvas.width * 0.9;
+    const cardHeight = canvas.height * 0.8;
+    const cardX = (canvas.width - cardWidth) / 2;
+    const cardY = (canvas.height - cardHeight) / 2;
+    
+    // 카드 배경
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 30);
+    ctx.fill();
+    
+    // 여백
+    const padding = canvas.width * 0.08;
+    const maxWidth = cardWidth - (padding * 2);
+    let y = cardY + padding + 80;
+    
+    // 명언 텍스트
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = `bold 54px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    
+    const textLines = wrapText(ctx, quote.text, maxWidth);
+    textLines.forEach((line) => {
+        ctx.fillText(line, canvas.width / 2, y);
+        y += 70;
+    });
+    
+    // 저자
+    y += 50;
+    ctx.fillStyle = '#8b6f47';
+    ctx.font = `italic 36px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.fillText(`— ${quote.author}`, canvas.width / 2, y);
+    
+    // 서비스명
+    y = cardY + cardHeight - padding - 50;
+    ctx.fillStyle = '#7f8c8d';
+    ctx.font = `28px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Mindful Today - 오늘의 마음챙김', canvas.width / 2, y);
+    
+    // 이미지 다운로드
+    canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `오늘의명언_인스타그램_${new Date().toISOString().split('T')[0]}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 'image/png');
+}
+
+// 트위터 공유
+function shareTwitter() {
+    const quote = {
+        text: document.getElementById('quoteText').textContent,
+        author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
+    };
+    const url = window.location.href;
+    const text = `"${quote.text}" — ${quote.author}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
+}
+
+// 페이스북 공유
+function shareFacebook() {
+    const url = window.location.href;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank', 'width=550,height=420');
+}
+
+// 공유 문구 복사
+function copyShareText() {
+    const shareText = document.getElementById('shareText').textContent;
+    navigator.clipboard.writeText(shareText).then(() => {
+        const btn = document.getElementById('copyShareText');
+        const originalText = btn.textContent;
+        btn.textContent = '복사 완료!';
+        btn.style.background = '#28a745';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+        }, 2000);
+    }).catch(() => {
+        alert('복사에 실패했습니다. 다시 시도해주세요.');
+    });
+}
+
+// 공유하기 (모달 열기)
+function shareQuote() {
+    openShareModal();
+}
+
+// 파비콘 동적 생성
+function createFavicon() {
+    const sizes = [16, 32, 180];
+    const links = {};
+    
+    // 기존 파비콘 링크 찾기 또는 생성
+    sizes.forEach(size => {
+        let rel = size === 180 ? 'apple-touch-icon' : 'icon';
+        let selector = size === 180 
+            ? `link[rel="${rel}"]` 
+            : `link[rel="${rel}"][sizes="${size}x${size}"]`;
+        
+        let link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = rel;
+            if (size !== 180) {
+                link.setAttribute('sizes', `${size}x${size}`);
+            }
+            document.head.appendChild(link);
+        }
+        links[size] = link;
+    });
+    
+    // favicon.ico 링크
+    let faviconIco = document.querySelector('link[rel="icon"][type="image/x-icon"]');
+    if (!faviconIco) {
+        faviconIco = document.createElement('link');
+        faviconIco.rel = 'icon';
+        faviconIco.type = 'image/x-icon';
+        document.head.appendChild(faviconIco);
+    }
+    links['ico'] = faviconIco;
+    
+    // 각 크기별로 파비콘 생성
+    sizes.forEach(size => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        // 둥근 사각형 배경
+        ctx.fillStyle = '#8b6f47';
+        ctx.beginPath();
+        const radius = size * 0.2;
+        ctx.moveTo(radius, 0);
+        ctx.lineTo(size - radius, 0);
+        ctx.quadraticCurveTo(size, 0, size, radius);
+        ctx.lineTo(size, size - radius);
+        ctx.quadraticCurveTo(size, size, size - radius, size);
+        ctx.lineTo(radius, size);
+        ctx.quadraticCurveTo(0, size, 0, size - radius);
+        ctx.lineTo(0, radius);
+        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 텍스트 'M'
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${size * 0.6}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('M', size / 2, size / 2);
+        
+        // Data URL로 변환
+        const dataUrl = canvas.toDataURL('image/png');
+        links[size].href = dataUrl;
+    });
+    
+    // favicon.ico는 32x32 사용
+    if (links['ico']) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 32;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = '#8b6f47';
+        ctx.beginPath();
+        ctx.moveTo(6, 0);
+        ctx.lineTo(26, 0);
+        ctx.quadraticCurveTo(32, 0, 32, 6);
+        ctx.lineTo(32, 26);
+        ctx.quadraticCurveTo(32, 32, 26, 32);
+        ctx.lineTo(6, 32);
+        ctx.quadraticCurveTo(0, 32, 0, 26);
+        ctx.lineTo(0, 6);
+        ctx.quadraticCurveTo(0, 0, 6, 0);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 20px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('M', 16, 16);
+        
+        links['ico'].href = canvas.toDataURL('image/png');
     }
 }
 
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', function() {
+    // 파비콘 생성
+    createFavicon();
+    
     // 날짜 표시
     displayDate();
     
-    // 오늘의 명언 표시
-    const todayQuote = getTodayQuote();
-    displayQuote(todayQuote);
+    // 랜덤 명언 표시 (새로고침할 때마다 다른 명언)
+    const randomQuote = getRandomQuote();
+    displayQuote(randomQuote);
     
     // 랜덤 명언 버튼
     document.getElementById('randomBtn').addEventListener('click', function() {
@@ -1296,5 +1630,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 공유하기 버튼
     document.getElementById('shareBtn').addEventListener('click', shareQuote);
+    
+    // 공유 모달 이벤트
+    document.getElementById('shareModalClose').addEventListener('click', closeShareModal);
+    document.getElementById('shareModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeShareModal();
+        }
+    });
+    
+    // 공유 옵션 버튼들
+    document.getElementById('shareKakao').addEventListener('click', shareKakao);
+    document.getElementById('shareInstagram').addEventListener('click', shareInstagram);
+    document.getElementById('shareCopyLink').addEventListener('click', copyUrl);
+    document.getElementById('shareDownloadImage').addEventListener('click', function() {
+        downloadQuoteImage();
+        closeShareModal();
+    });
+    document.getElementById('shareTwitter').addEventListener('click', shareTwitter);
+    document.getElementById('shareFacebook').addEventListener('click', shareFacebook);
+    document.getElementById('copyShareText').addEventListener('click', copyShareText);
+    
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeShareModal();
+        }
+    });
 });
 
