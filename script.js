@@ -1025,11 +1025,93 @@ function getQuoteByMood(mood) {
     return filteredQuotes[randomIndex];
 }
 
+// 동적 SEO 메타 태그 업데이트
+function updateSEOMetaTags(quote) {
+    const quoteText = quote.text.length > 100 ? quote.text.substring(0, 100) + '...' : quote.text;
+    const title = `"${quoteText}" — ${quote.author} | 오늘의 인생명언`;
+    const description = `${quoteText} — ${quote.author}. ${quote.comment}`;
+    
+    // 페이지 타이틀 업데이트
+    document.title = title;
+    
+    // Meta description 업데이트
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', description);
+    
+    // Open Graph 업데이트
+    updateOGTag('og:title', title);
+    updateOGTag('og:description', description);
+    
+    // Twitter Card 업데이트
+    updateMetaTag('twitter:title', title);
+    updateMetaTag('twitter:description', description);
+    
+    // 구조화된 데이터 업데이트
+    updateStructuredData(quote);
+}
+
+// Open Graph 태그 업데이트
+function updateOGTag(property, content) {
+    let tag = document.querySelector(`meta[property="${property}"]`);
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+}
+
+// Meta 태그 업데이트
+function updateMetaTag(name, content) {
+    let tag = document.querySelector(`meta[name="${name}"]`);
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+}
+
+// 구조화된 데이터 업데이트
+function updateStructuredData(quote) {
+    let scriptTag = document.getElementById('quote-structured-data');
+    if (scriptTag) {
+        scriptTag.remove();
+    }
+    
+    scriptTag = document.createElement('script');
+    scriptTag.id = 'quote-structured-data';
+    scriptTag.type = 'application/ld+json';
+    scriptTag.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Quotation",
+        "text": quote.text,
+        "author": {
+            "@type": "Person",
+            "name": quote.author
+        },
+        "about": {
+            "@type": "Thing",
+            "name": quote.category
+        },
+        "inLanguage": "ko"
+    });
+    document.head.appendChild(scriptTag);
+}
+
 // 명언 표시
 function displayQuote(quote) {
     document.getElementById('quoteText').textContent = quote.text;
     document.getElementById('quoteAuthor').textContent = `— ${quote.author}`;
     document.getElementById('quoteComment').textContent = quote.comment;
+    
+    // SEO 메타 태그 업데이트
+    updateSEOMetaTags(quote);
     
     // 애니메이션 효과
     const card = document.getElementById('quoteCard');

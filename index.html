@@ -5,22 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- SEO Meta Tags -->
-    <title>오늘의 인생명언 — 하루 한 문장으로 마음 충전</title>
-    <meta name="description" content="매일 한 줄의 명언으로 힐링하세요. 사랑, 관계, 삶, 감정, 동기부여 카테고리별 명언 서비스.">
-    <meta name="keywords" content="인생명언, 오늘의 명언, 명언, 힐링, 동기부여, 위로, 인생철학">
+    <!-- Primary SEO Meta Tags -->
+    <title>오늘의 인생명언 — 하루 한 문장으로 마음 충전 | Mindful Today</title>
+    <meta name="title" content="오늘의 인생명언 — 하루 한 문장으로 마음 충전">
+    <meta name="description" content="매일 한 줄의 명언으로 힐링하세요. 사랑, 관계, 삶, 감정, 동기부여 카테고리별 명언 서비스. 오늘의 인생명언으로 하루를 시작하세요.">
+    <meta name="keywords" content="인생명언, 오늘의 명언, 명언, 힐링, 동기부여, 위로, 인생철학, 감동명언, 동기부여명언, 위로명언, 사랑명언, 철학명언, 일일명언, 데일리명언">
+    <meta name="author" content="Mindful Today">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Korean">
+    <meta name="revisit-after" content="1 days">
     
-    <!-- Open Graph Meta Tags -->
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mindful-today.com/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mindful-today.com/">
     <meta property="og:title" content="오늘의 인생명언 — 하루 한 문장으로 마음 충전">
     <meta property="og:description" content="매일 한 줄의 명언으로 힐링하세요. 사랑, 관계, 삶, 감정, 동기부여 카테고리별 명언 서비스.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="">
-    <meta property="og:url" content="">
+    <meta property="og:image" content="https://mindful-today.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Mindful Today">
+    <meta property="og:locale" content="ko_KR">
     
-    <!-- Twitter Card Meta Tags -->
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://mindful-today.com/">
     <meta name="twitter:title" content="오늘의 인생명언 — 하루 한 문장으로 마음 충전">
     <meta name="twitter:description" content="매일 한 줄의 명언으로 힐링하세요. 사랑, 관계, 삶, 감정, 동기부여 카테고리별 명언 서비스.">
+    <meta name="twitter:image" content="https://mindful-today.com/og-image.png">
+    <meta name="twitter:creator" content="@mindfultoday">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Mindful Today",
+        "alternateName": "오늘의 인생명언",
+        "url": "https://mindful-today.com/",
+        "description": "매일 한 줄의 명언으로 힐링하는 서비스",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Mindful Today",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://mindful-today.com/logo.png"
+            }
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://mindful-today.com/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "오늘의 인생명언",
+        "description": "매일 한 줄의 명언으로 힐링하는 서비스",
+        "genre": "명언, 인생철학, 동기부여",
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "일반인"
+        }
+    }
+    </script>
     
     <link rel="stylesheet" href="style.css">
 </head>
@@ -28,12 +90,23 @@
     <!-- TODO: 여기 AdSense 광고 스크립트 삽입 -->
     
     <div class="container">
-        <header>
+        <header role="banner">
             <h1>오늘의 인생명언</h1>
-            <p class="date" id="todayDate"></p>
+            <p class="date" id="todayDate" aria-label="오늘 날짜"></p>
         </header>
 
-        <main>
+        <main role="main">
+            <section class="intro-section">
+                <h2>하루 한 문장으로 마음 충전하세요</h2>
+                <p class="intro-text">
+                    Mindful Today는 매일 새로운 인생명언을 제공하는 힐링 서비스입니다. 
+                    역사적 인물과 현대의 지혜로운 사람들이 남긴 명언들을 통해 하루하루를 더욱 의미 있게 보내실 수 있습니다. 
+                    오늘의 명언은 날짜 기반으로 자동 선택되어 매일 다른 감동을 전해드립니다. 
+                    우울하거나 불안할 때, 동기부여가 필요할 때, 인생의 지침이 필요할 때, 
+                    또는 기쁨을 나누고 싶을 때 각 기분에 맞는 명언을 선택해 드립니다.
+                </p>
+            </section>
+
             <div class="quote-card" id="quoteCard">
                 <div class="quote-text" id="quoteText"></div>
                 <div class="quote-author" id="quoteAuthor"></div>
@@ -45,6 +118,12 @@
                 
                 <div class="mood-section">
                     <p class="mood-title">오늘의 기분은 어떤가요?</p>
+                    <p class="mood-description">
+                        현재 감정 상태에 맞는 명언을 선택해보세요. 
+                        우울할 때는 위로가 되는 명언, 불안할 때는 안정을 주는 명언, 
+                        동기부여가 필요할 때는 영감을 주는 명언, 인생의 방향이 필요할 때는 지침이 되는 명언, 
+                        기쁨을 느낄 때는 감사를 깨닫게 하는 명언을 제공합니다.
+                    </p>
                     <div class="mood-buttons">
                         <button class="btn btn-mood" data-mood="우울">우울</button>
                         <button class="btn btn-mood" data-mood="불안">불안</button>
@@ -60,7 +139,123 @@
                     <button class="btn btn-action" id="shareBtn">공유하기</button>
                 </div>
             </div>
+
+            <section class="categories-section">
+                <h2>명언 카테고리</h2>
+                <div class="category-grid">
+                    <div class="category-item">
+                        <h3>삶과 철학</h3>
+                        <p>
+                            인생의 본질과 인간 존재에 대한 깊은 성찰을 담은 명언들입니다. 
+                            고대 철학자부터 현대 사상가까지, 시간을 초월한 지혜가 담겨있어 
+                            삶의 의미를 되새기게 만듭니다.
+                        </p>
+                    </div>
+                    <div class="category-item">
+                        <h3>성공과 도전</h3>
+                        <p>
+                            목표를 이루고 꿈을 실현하기 위한 동기부여와 실용적인 조언을 제공하는 명언들입니다. 
+                            위대한 성취를 이룬 사람들의 경험과 노하우를 통해 용기와 힘을 얻을 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="category-item">
+                        <h3>위로와 희망</h3>
+                        <p>
+                            어려운 시기나 힘든 순간에 마음을 달래주는 따뜻한 명언들입니다. 
+                            절망 속에서도 희망을 잃지 않도록, 고통 속에서도 위로를 받을 수 있도록 돕습니다.
+                        </p>
+                    </div>
+                    <div class="category-item">
+                        <h3>인간관계와 사랑</h3>
+                        <p>
+                            가족, 친구, 연인 등 다양한 관계에서의 지혜와 사랑의 의미를 전하는 명언들입니다. 
+                            진정한 소통과 이해, 그리고 무조건적인 사랑의 가치를 일깨워줍니다.
+                        </p>
+                    </div>
+                    <div class="category-item">
+                        <h3>동기부여</h3>
+                        <p>
+                            무기력함을 벗어나 행동하도록 이끄는 강력한 메시지들입니다. 
+                            변화의 첫걸음을 내딛게 하고, 계속해서 나아가도록 동기를 부여합니다.
+                        </p>
+                    </div>
+                    <div class="category-item">
+                        <h3>감정과 치유</h3>
+                        <p>
+                            다양한 감정을 이해하고 수용하는 방법을 알려주는 명언들입니다. 
+                            감정의 흐름을 자연스럽게 받아들이고, 마음의 상처를 치유하는 힘을 줍니다.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="how-to-section">
+                <h2>서비스 이용 방법</h2>
+                <div class="how-to-list">
+                    <div class="how-to-item">
+                        <h3>1. 오늘의 명언 확인</h3>
+                        <p>
+                            페이지에 접속하면 오늘 날짜에 맞는 특별한 명언이 자동으로 표시됩니다. 
+                            매일 다른 명언이 나타나므로 매일 방문하시면 새로운 영감을 받으실 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="how-to-item">
+                        <h3>2. 랜덤 명언 탐색</h3>
+                        <p>
+                            '다른 명언 보기' 버튼을 클릭하면 160개 이상의 명언 중 랜덤으로 다른 명언을 볼 수 있습니다. 
+                            여러 명언을 탐색하며 마음에 드는 명언을 찾아보세요.
+                        </p>
+                    </div>
+                    <div class="how-to-item">
+                        <h3>3. 기분별 명언 선택</h3>
+                        <p>
+                            현재 감정 상태에 맞는 버튼을 선택하시면 해당 기분에 어울리는 명언을 추천해드립니다. 
+                            우울, 불안, 동기부여, 지침, 기쁨 등 다섯 가지 기분 중에서 선택할 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="how-to-item">
+                        <h3>4. 명언 공유하기</h3>
+                        <p>
+                            마음에 드는 명언을 발견하셨나요? 이미지로 다운로드하거나, 
+                            URL을 복사하거나, Web Share API를 통해 카카오톡, 메신저 등으로 쉽게 공유할 수 있습니다. 
+                            소중한 사람들과 함께 의미 있는 명언을 나눠보세요.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="about-section">
+                <h2>Mindful Today에 대해</h2>
+                <p>
+                    Mindful Today는 바쁜 일상 속에서도 잠시 멈춰서 자신을 돌아보고, 
+                    마음을 채우고, 새로운 영감을 얻을 수 있는 공간을 만들고자 합니다. 
+                    역사 속 위대한 인물들과 현대의 지혜로운 사람들이 남긴 명언들은 단순한 문장을 넘어 
+                    인생의 지침이 되고, 어려운 순간의 위로가 되며, 새로운 도전의 동력이 됩니다.
+                </p>
+                <p>
+                    우리는 매일 다양한 감정과 상황을 경험합니다. 때로는 우울하고, 때로는 불안하며, 
+                    때로는 동기부여가 필요하고, 때로는 인생의 방향이 필요하며, 때로는 기쁨을 나누고 싶습니다. 
+                    Mindful Today는 그러한 모든 순간에 맞는 명언을 제공하여 여러분의 하루하루가 더욱 의미 있게 되기를 바랍니다.
+                </p>
+                <p>
+                    명언은 단순히 읽는 것이 아니라, 자신의 삶에 적용하고 실천할 때 진정한 가치를 발휘합니다. 
+                    매일 한 문장씩, 천천히 음미하며 읽어보시기 바랍니다. 
+                    그리고 필요하다면 메모하거나 이미지로 저장하여 언제든 다시 볼 수 있도록 하세요.
+                </p>
+            </section>
         </main>
+
+        <footer role="contentinfo" class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Mindful Today. All rights reserved.</p>
+                <p class="footer-text">
+                    Mindful Today는 매일 새로운 인생명언을 제공하는 무료 서비스입니다. 
+                    이 서비스를 통해 더 나은 하루를 보내시고, 소중한 사람들과 의미 있는 명언을 공유하시기 바랍니다. 
+                    명언은 힐링과 동기부여, 그리고 인생의 지침을 제공하는 도구입니다. 
+                    여러분의 일상에 작은 변화와 긍정적인 에너지를 가져다주기를 희망합니다.
+                </p>
+            </div>
+        </footer>
     </div>
 
     <!-- TODO: 여기 AdSense 광고 스크립트 삽입 -->
