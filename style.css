@@ -398,15 +398,18 @@ header h1 {
 .footer p {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-bottom: 15px;
+    margin: 0;
 }
 
-.footer-text {
-    font-size: 0.85rem;
-    line-height: 1.7;
+.footer-email {
     color: var(--text-secondary);
-    max-width: 600px;
-    margin: 0 auto;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    margin: 0 5px;
+}
+
+.footer-email:hover {
+    color: var(--accent-color);
 }
 
 /* 광고 컨테이너 */
