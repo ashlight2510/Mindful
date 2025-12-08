@@ -1330,6 +1330,7 @@ function openShareModal() {
     // 썸네일 생성
     const thumbnailUrl = createShareThumbnail();
     thumbnail.src = thumbnailUrl;
+    thumbnail.style.display = 'block'; // 썸네일 표시
     
     // 공유 문구 생성
     const quote = {
@@ -1339,12 +1340,27 @@ function openShareModal() {
     const shareTextContent = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today\n${window.location.href}`;
     shareText.textContent = shareTextContent;
     
-    // Open Graph 이미지 업데이트
-    updateOGTag('og:image', thumbnailUrl);
+    // Open Graph 이미지 업데이트 (Data URL은 소셜 미디어에서 작동하지 않으므로 주석 처리)
+    // updateOGTag('og:image', thumbnailUrl);
+    // updateMetaTag('twitter:image', thumbnailUrl);
+    
+    // 썸네일을 Blob URL로 저장 (공유 시 사용)
+    canvasToBlob(thumbnailUrl, function(blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        modal.dataset.imageBlob = blobUrl;
+    });
     
     // 모달 표시
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
+}
+
+// Data URL을 Blob으로 변환
+function canvasToBlob(dataUrl, callback) {
+    fetch(dataUrl)
+        .then(res => res.blob())
+        .then(blob => callback(blob))
+        .catch(err => console.error('Blob 변환 실패:', err));
 }
 
 // 공유 모달 닫기
@@ -1354,6 +1370,17 @@ function closeShareModal() {
     document.body.style.overflow = '';
 }
 
+// 카카오 SDK 초기화
+function initKakaoSDK() {
+    if (typeof Kakao !== 'undefined') {
+        Kakao.init('42590e62c473b86c49c72dad2592285d');
+        console.log('카카오 SDK 초기화 완료');
+    } else {
+        console.log('카카오 SDK 로드 대기 중...');
+        setTimeout(initKakaoSDK, 100);
+    }
+}
+
 // 카카오톡 공유
 function shareKakao() {
     const quote = {
@@ -1361,11 +1388,37 @@ function shareKakao() {
         author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
     };
     const url = window.location.href;
-    const thumbnail = document.getElementById('shareThumbnail').src;
+    const modal = document.getElementById('shareModal');
+    const thumbnailUrl = document.getElementById('shareThumbnail').src;
     
-    // 카카오톡 링크 공유 (카카오 SDK 필요)
-    const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`;
-    window.open(kakaoUrl, '_blank');
+    // 카카오 SDK 사용
+    if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+        Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: `"${quote.text}"`,
+                description: `— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`,
+                imageUrl: thumbnailUrl,
+                link: {
+                    mobileWebUrl: url,
+                    webUrl: url,
+                },
+            },
+            buttons: [
+                {
+                    title: '명언 보기',
+                    link: {
+                        mobileWebUrl: url,
+                        webUrl: url,
+                    },
+                },
+            ],
+        });
+    } else {
+        // 카카오 SDK 미지원 시 링크 공유
+        const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`;
+        window.open(kakaoUrl, '_blank');
+    }
 }
 
 // 인스타그램용 이미지 저장 (정사각형)
@@ -1452,7 +1505,7 @@ function shareTwitter() {
         author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
     };
     const url = window.location.href;
-    const text = `"${quote.text}" — ${quote.author}`;
+    const text = `"${quote.text}" — ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=550,height=420');
 }
@@ -1486,7 +1539,40 @@ function shareQuote() {
     openShareModal();
 }
 
-// 파비콘 동적 생성
+// 파비콘 생성 함수 (단일 크기)
+function createFaviconImage(size) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    
+    // 둥근 사각형 배경
+    ctx.fillStyle = '#8b6f47';
+    ctx.beginPath();
+    const radius = size * 0.2;
+    ctx.moveTo(radius, 0);
+    ctx.lineTo(size - radius, 0);
+    ctx.quadraticCurveTo(size, 0, size, radius);
+    ctx.lineTo(size, size - radius);
+    ctx.quadraticCurveTo(size, size, size - radius, size);
+    ctx.lineTo(radius, size);
+    ctx.quadraticCurveTo(0, size, 0, size - radius);
+    ctx.lineTo(0, radius);
+    ctx.quadraticCurveTo(0, 0, radius, 0);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 텍스트 'M'
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${size * 0.6}px Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('M', size / 2, size / 2);
+    
+    return canvas.toDataURL('image/png');
+}
+
+// 파비콘 동적 생성 및 적용
 function createFavicon() {
     const sizes = [16, 32, 180];
     const links = {};
@@ -1505,91 +1591,99 @@ function createFavicon() {
             if (size !== 180) {
                 link.setAttribute('sizes', `${size}x${size}`);
             }
+            link.type = 'image/png';
             document.head.appendChild(link);
         }
         links[size] = link;
     });
     
-    // favicon.ico 링크
-    let faviconIco = document.querySelector('link[rel="icon"][type="image/x-icon"]');
-    if (!faviconIco) {
-        faviconIco = document.createElement('link');
-        faviconIco.rel = 'icon';
-        faviconIco.type = 'image/x-icon';
-        document.head.appendChild(faviconIco);
+    // shortcut icon 링크
+    let shortcutIcon = document.querySelector('link[rel="shortcut icon"]');
+    if (!shortcutIcon) {
+        shortcutIcon = document.createElement('link');
+        shortcutIcon.rel = 'shortcut icon';
+        shortcutIcon.type = 'image/png';
+        document.head.appendChild(shortcutIcon);
     }
-    links['ico'] = faviconIco;
+    links['shortcut'] = shortcutIcon;
     
-    // 각 크기별로 파비콘 생성
+    // 각 크기별로 파비콘 생성 및 적용
     sizes.forEach(size => {
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        
-        // 둥근 사각형 배경
-        ctx.fillStyle = '#8b6f47';
-        ctx.beginPath();
-        const radius = size * 0.2;
-        ctx.moveTo(radius, 0);
-        ctx.lineTo(size - radius, 0);
-        ctx.quadraticCurveTo(size, 0, size, radius);
-        ctx.lineTo(size, size - radius);
-        ctx.quadraticCurveTo(size, size, size - radius, size);
-        ctx.lineTo(radius, size);
-        ctx.quadraticCurveTo(0, size, 0, size - radius);
-        ctx.lineTo(0, radius);
-        ctx.quadraticCurveTo(0, 0, radius, 0);
-        ctx.closePath();
-        ctx.fill();
-        
-        // 텍스트 'M'
-        ctx.fillStyle = 'white';
-        ctx.font = `bold ${size * 0.6}px Arial, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('M', size / 2, size / 2);
-        
-        // Data URL로 변환
-        const dataUrl = canvas.toDataURL('image/png');
-        links[size].href = dataUrl;
+        const dataUrl = createFaviconImage(size);
+        if (links[size]) {
+            links[size].href = dataUrl;
+        }
     });
     
-    // favicon.ico는 32x32 사용
-    if (links['ico']) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 32;
-        canvas.height = 32;
-        const ctx = canvas.getContext('2d');
-        
-        ctx.fillStyle = '#8b6f47';
-        ctx.beginPath();
-        ctx.moveTo(6, 0);
-        ctx.lineTo(26, 0);
-        ctx.quadraticCurveTo(32, 0, 32, 6);
-        ctx.lineTo(32, 26);
-        ctx.quadraticCurveTo(32, 32, 26, 32);
-        ctx.lineTo(6, 32);
-        ctx.quadraticCurveTo(0, 32, 0, 26);
-        ctx.lineTo(0, 6);
-        ctx.quadraticCurveTo(0, 0, 6, 0);
-        ctx.closePath();
-        ctx.fill();
-        
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 20px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('M', 16, 16);
-        
-        links['ico'].href = canvas.toDataURL('image/png');
+    // shortcut icon은 32x32 사용
+    if (links['shortcut']) {
+        links['shortcut'].href = createFaviconImage(32);
     }
+    
+    // 기본 icon도 설정
+    const defaultIcon = document.querySelector('link[rel="icon"]:not([sizes])');
+    if (defaultIcon && defaultIcon.href === '' || !defaultIcon.href.includes('favicon.svg')) {
+        // SVG가 없으면 PNG로 대체
+        if (!defaultIcon.href || defaultIcon.href === '' || defaultIcon.href === window.location.href) {
+            defaultIcon.href = createFaviconImage(32);
+        }
+    }
+}
+
+// 기본 OG 이미지 생성 함수 (공유용 기본 이미지)
+function createDefaultOGImage() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1200;
+    canvas.height = 630;
+    
+    // 배경 그라데이션
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#fafafa');
+    gradient.addColorStop(1, '#f5f1eb');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 중앙 카드
+    const cardWidth = canvas.width * 0.85;
+    const cardHeight = canvas.height * 0.75;
+    const cardX = (canvas.width - cardWidth) / 2;
+    const cardY = (canvas.height - cardHeight) / 2;
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 20);
+    ctx.fill();
+    
+    // 텍스트
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('오늘의 마음챙김', canvas.width / 2, canvas.height / 2 - 60);
+    
+    ctx.fillStyle = '#8b6f47';
+    ctx.font = '32px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif';
+    ctx.fillText('하루 한 문장으로 마음 충전하세요', canvas.width / 2, canvas.height / 2 + 40);
+    
+    return canvas.toDataURL('image/png');
 }
 
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', function() {
-    // 파비콘 생성
-    createFavicon();
+    // 카카오 SDK 초기화
+    initKakaoSDK();
+    
+    // 파비콘 생성 (PNG 버전도 함께 생성)
+    try {
+        createFavicon();
+    } catch (e) {
+        console.log('파비콘 생성 실패:', e);
+    }
+    
+    // 기본 OG 이미지 생성 (메타 태그에는 실제 서버 URL 필요)
+    // 현재는 동적 생성이므로 소셜 미디어 크롤러가 읽을 수 없음
+    // 서버에 실제 og-image.png 파일을 업로드하면 작동함
     
     // 날짜 표시
     displayDate();

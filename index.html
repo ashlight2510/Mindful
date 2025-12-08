@@ -23,9 +23,10 @@
     <meta property="og:url" content="https://mindful-today.com/">
     <meta property="og:title" content="오늘의 마음챙김 — 하루 한 문장으로 마음 충전">
     <meta property="og:description" content="매일 한 줄의 명언으로 힐링하세요. 사랑, 관계, 삶, 감정, 동기부여 카테고리별 명언 서비스.">
-    <meta property="og:image" content="https://mindful-today.com/og-image.png">
+    <meta property="og:image" content="">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:site_name" content="Mindful Today">
     <meta property="og:locale" content="ko_KR">
     
@@ -38,10 +39,11 @@
     <meta name="twitter:creator" content="@mindfultoday">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="">
-    <link rel="icon" type="image/png" sizes="16x16" href="">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/png" sizes="32x32" href="">
+    <link rel="alternate icon" type="image/png" sizes="16x16" href="">
     <link rel="apple-touch-icon" sizes="180x180" href="">
+    <link rel="shortcut icon" type="image/png" href="">
     
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -85,6 +87,9 @@
     </script>
     
     <link rel="stylesheet" href="style.css">
+    
+    <!-- 카카오 JavaScript SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
 </head>
 <body>
     <!-- 카카오 애드핏 광고 스크립트 -->
@@ -285,7 +290,7 @@
                 <button class="share-modal-close" id="shareModalClose">&times;</button>
             </div>
             <div class="share-thumbnail-container">
-                <img id="shareThumbnail" src="" alt="명언 썸네일" />
+                <img id="shareThumbnail" src="" alt="명언 썸네일" style="display: block; width: 100%;" />
             </div>
             <div class="share-options">
                 <button class="share-option-btn" id="shareKakao">
