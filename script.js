@@ -1388,32 +1388,40 @@ function shareKakao() {
         author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
     };
     const url = window.location.href;
-    const modal = document.getElementById('shareModal');
-    const thumbnailUrl = document.getElementById('shareThumbnail').src;
     
     // 카카오 SDK 사용
     if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
-        Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-                title: `"${quote.text}"`,
-                description: `— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`,
-                imageUrl: thumbnailUrl,
-                link: {
-                    mobileWebUrl: url,
-                    webUrl: url,
-                },
-            },
-            buttons: [
-                {
-                    title: '명언 보기',
+        try {
+            // 카카오톡 API는 공개 URL만 지원하므로 Data URL은 사용 불가
+            // 이미지 없이 텍스트와 링크만 공유
+            Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: `"${quote.text}"`,
+                    description: `— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today\n${url}`,
+                    // imageUrl은 공개 서버에 업로드된 이미지 URL만 가능
+                    // imageUrl: '', // 필요시 서버에 업로드한 이미지 URL 사용
                     link: {
                         mobileWebUrl: url,
                         webUrl: url,
                     },
                 },
-            ],
-        });
+                buttons: [
+                    {
+                        title: '명언 보기',
+                        link: {
+                            mobileWebUrl: url,
+                            webUrl: url,
+                        },
+                    },
+                ],
+            });
+        } catch (error) {
+            console.error('카카오톡 공유 실패:', error);
+            alert('카카오톡 공유에 실패했습니다. 링크 복사 기능을 사용해주세요.');
+            // 에러 발생 시 링크 공유로 대체
+            copyUrl();
+        }
     } else {
         // 카카오 SDK 미지원 시 링크 공유
         const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(url)}`;
