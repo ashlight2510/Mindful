@@ -1370,18 +1370,7 @@ function closeShareModal() {
     document.body.style.overflow = '';
 }
 
-// 카카오 SDK 초기화
-function initKakaoSDK() {
-    if (typeof Kakao !== 'undefined') {
-        Kakao.init('42590e62c473b86c49c72dad2592285d');
-        console.log('카카오 SDK 초기화 완료');
-    } else {
-        console.log('카카오 SDK 로드 대기 중...');
-        setTimeout(initKakaoSDK, 100);
-    }
-}
-
-// 카카오톡 공유
+// 카카오톡 공유 (링크 공유 방식 - SDK 불필요)
 function shareKakao() {
     const quote = {
         text: document.getElementById('quoteText').textContent,
@@ -1389,14 +1378,13 @@ function shareKakao() {
     };
     const url = window.location.href;
     
-    // 카카오톡 링크 공유 API 사용 (더 안정적)
-    // sharer.kakao.com/picker/link 방식
-    const shareUrl = new URL('https://sharer.kakao.com/picker/link');
-    shareUrl.searchParams.set('url', url);
-    shareUrl.searchParams.set('text', `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`);
+    // 카카오톡 링크 공유 (sharer.kakao.com 방식 - 앱 키 불필요)
+    // 이 방식은 카카오 SDK 초기화 없이도 작동
+    const shareText = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
+    const shareUrl = `https://sharer.kakao.com/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
     
     // 새 창에서 열기
-    window.open(shareUrl.toString(), '_blank', 'width=500,height=600');
+    window.open(shareUrl, '_blank', 'width=500,height=600');
 }
 
 // 인스타그램용 이미지 저장 (정사각형)
@@ -1649,9 +1637,6 @@ function createDefaultOGImage() {
 
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', function() {
-    // 카카오 SDK 초기화
-    initKakaoSDK();
-    
     // 파비콘 생성 (PNG 버전도 함께 생성)
     try {
         createFavicon();
