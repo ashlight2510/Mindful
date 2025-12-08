@@ -1370,7 +1370,20 @@ function closeShareModal() {
     document.body.style.overflow = '';
 }
 
-// 카카오톡 공유 (링크 공유 방식 - SDK 불필요)
+// 카카오 SDK 초기화
+function initKakaoSDK() {
+    if (typeof Kakao !== 'undefined') {
+        if (!Kakao.isInitialized()) {
+            Kakao.init('42590e62c473b86c49c72dad2592285d');
+            console.log('카카오 SDK 초기화 완료');
+        }
+    } else {
+        // SDK 로드 대기
+        setTimeout(initKakaoSDK, 100);
+    }
+}
+
+// 카카오톡 공유
 function shareKakao() {
     const quote = {
         text: document.getElementById('quoteText').textContent,
@@ -1378,13 +1391,43 @@ function shareKakao() {
     };
     const url = window.location.href;
     
-    // 카카오톡 링크 공유 (sharer.kakao.com 방식 - 앱 키 불필요)
-    // 이 방식은 카카오 SDK 초기화 없이도 작동
-    const shareText = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
-    const shareUrl = `https://sharer.kakao.com/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
-    
-    // 새 창에서 열기
-    window.open(shareUrl, '_blank', 'width=500,height=600');
+    // 카카오 SDK 사용
+    if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+        try {
+            Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: `"${quote.text}"`,
+                    description: `— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`,
+                    imageUrl: '', // 이미지는 공개 서버 URL 필요
+                    link: {
+                        mobileWebUrl: url,
+                        webUrl: url,
+                    },
+                },
+                buttons: [
+                    {
+                        title: '명언 보기',
+                        link: {
+                            mobileWebUrl: url,
+                            webUrl: url,
+                        },
+                    },
+                ],
+            });
+        } catch (error) {
+            console.error('카카오톡 공유 실패:', error);
+            // 에러 발생 시 링크 공유로 대체
+            const shareText = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
+            const shareUrl = `https://sharer.kakao.com/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
+            window.open(shareUrl, '_blank', 'width=500,height=600');
+        }
+    } else {
+        // SDK 미지원 시 링크 공유
+        const shareText = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
+        const shareUrl = `https://sharer.kakao.com/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
+        window.open(shareUrl, '_blank', 'width=500,height=600');
+    }
 }
 
 // 인스타그램용 이미지 저장 (정사각형)
@@ -1637,6 +1680,9 @@ function createDefaultOGImage() {
 
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', function() {
+    // 카카오 SDK 초기화
+    initKakaoSDK();
+    
     // 파비콘 생성 (PNG 버전도 함께 생성)
     try {
         createFavicon();
