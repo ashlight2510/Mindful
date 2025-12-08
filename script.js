@@ -1232,7 +1232,7 @@ function copyUrl() {
     });
 }
 
-// 공유용 썸네일 이미지 생성 (OG 이미지용)
+// 공유용 썸네일 이미지 생성 (OG 이미지용) - 개선된 버전
 function createShareThumbnail(width = 1200, height = 630) {
     const quote = {
         text: document.getElementById('quoteText').textContent,
@@ -1246,60 +1246,102 @@ function createShareThumbnail(width = 1200, height = 630) {
     canvas.width = width;
     canvas.height = height;
     
-    // 배경 그라데이션
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#fafafa');
-    gradient.addColorStop(1, '#f5f1eb');
-    ctx.fillStyle = gradient;
+    // 배경 그라데이션 (더 부드러운 톤)
+    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+    bgGradient.addColorStop(0, '#f8f6f2');
+    bgGradient.addColorStop(0.5, '#f5f1eb');
+    bgGradient.addColorStop(1, '#ede8e0');
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
     
-    // 중앙 카드
-    const cardWidth = width * 0.85;
-    const cardHeight = height * 0.75;
+    // 장식 원형 요소들
+    ctx.fillStyle = 'rgba(139, 111, 71, 0.03)';
+    ctx.beginPath();
+    ctx.arc(width * 0.15, height * 0.2, width * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(width * 0.85, height * 0.8, width * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // 중앙 카드 (그림자 포함)
+    const cardWidth = width * 0.88;
+    const cardHeight = height * 0.78;
     const cardX = (width - cardWidth) / 2;
     const cardY = (height - cardHeight) / 2;
     
-    // 카드 배경
-    ctx.fillStyle = '#ffffff';
+    // 카드 그림자
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
     ctx.beginPath();
-    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 20);
+    ctx.roundRect(cardX + 4, cardY + 8, cardWidth, cardHeight, 24);
     ctx.fill();
     
-    // 카드 그림자 효과
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 10;
+    // 카드 배경 (흰색)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 24);
+    ctx.fill();
+    
+    // 상단 장식 라인
+    ctx.fillStyle = '#8b6f47';
+    ctx.fillRect(cardX + width * 0.15, cardY + 20, width * 0.7, 4);
     
     // 여백
-    const padding = width * 0.08;
+    const padding = width * 0.1;
     const maxWidth = cardWidth - (padding * 2);
-    let y = cardY + padding + 60;
+    let y = cardY + padding + 80;
     
-    // 명언 텍스트
+    // 인용 부호 (장식)
+    ctx.fillStyle = 'rgba(139, 111, 71, 0.15)';
+    ctx.font = `bold ${width * 0.12}px Georgia, serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('"', cardX + padding - 20, y - 20);
+    
+    // 명언 텍스트 (더 큰 폰트, 더 강조)
     ctx.fillStyle = '#2c3e50';
-    ctx.shadowColor = 'transparent';
-    ctx.font = `bold ${width * 0.04}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.font = `bold ${Math.min(width * 0.048, 58)}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
+    ctx.lineHeight = 1.6;
     
     const textLines = wrapText(ctx, quote.text, maxWidth);
-    textLines.forEach((line) => {
+    textLines.forEach((line, index) => {
+        // 텍스트 그림자 효과
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
         ctx.fillText(line, width / 2, y);
-        y += width * 0.05;
+        ctx.shadowColor = 'transparent';
+        y += Math.max(width * 0.055, 65);
     });
     
+    // 구분선
+    y += 30;
+    ctx.strokeStyle = '#e8e8e8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(width / 2 - maxWidth * 0.3, y);
+    ctx.lineTo(width / 2 + maxWidth * 0.3, y);
+    ctx.stroke();
+    
     // 저자
-    y += width * 0.03;
+    y += 40;
     ctx.fillStyle = '#8b6f47';
-    ctx.font = `italic ${width * 0.025}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.font = `italic ${Math.min(width * 0.028, 34)}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
     ctx.fillText(`— ${quote.author}`, width / 2, y);
     
-    // 서비스명
-    y = cardY + cardHeight - padding - 40;
-    ctx.fillStyle = '#7f8c8d';
-    ctx.font = `${width * 0.018}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    // 하단 서비스명 영역
+    y = cardY + cardHeight - padding - 50;
+    ctx.fillStyle = '#b8b8b8';
+    ctx.font = `${Math.min(width * 0.016, 20)}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText('Mindful Today - 오늘의 마음챙김', width / 2, y);
+    ctx.fillText('오늘의 마음챙김', width / 2, y);
+    
+    y += 28;
+    ctx.fillStyle = '#d0d0d0';
+    ctx.font = `${Math.min(width * 0.014, 18)}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
+    ctx.fillText('Mindful Today', width / 2, y);
     
     return canvas.toDataURL('image/png');
 }

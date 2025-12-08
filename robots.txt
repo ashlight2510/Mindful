@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://mindful-today.com/sitemap.xml
+Sitemap: https://mind.funnyfunny.cloud/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1
