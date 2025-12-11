@@ -93,23 +93,11 @@
     <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
 </head>
 <body>
-    <!-- 카카오 애드핏 광고 스크립트 -->
-    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-    
     <div class="container">
         <header role="banner">
             <h1>오늘의 마음챙김</h1>
             <p class="date" id="todayDate" aria-label="오늘 날짜"></p>
         </header>
-        
-        <!-- 카카오 애드핏 광고 - 헤더 아래 -->
-        <div class="ad-container ad-header">
-            <ins class="kakao_ad_area" 
-                 data-ad-unit="DAN-SEktgnQrJVWqXOJq"
-                 data-ad-width="300"
-                 data-ad-height="250"
-                 style="display:none;"></ins>
-        </div>
 
         <main role="main">
             <section class="intro-section">
@@ -270,14 +258,18 @@
             </div>
         </footer>
         
-        <!-- 카카오 애드핏 광고 - 본문 하단 -->
-        <div class="ad-container ad-footer">
-            <ins class="kakao_ad_area" 
-                 data-ad-unit="DAN-SEktgnQrJVWqXOJq"
-                 data-ad-width="300"
-                 data-ad-height="250"
-                 style="display:none;"></ins>
-        </div>
+    </div>
+
+    <!-- 카카오 애드핏 광고 스크립트 -->
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
+    <!-- 카카오 애드핏 광고 - 페이지 하단 -->
+    <div class="ad-container ad-footer">
+        <ins class="kakao_ad_area" 
+             data-ad-unit="DAN-SEktgnQrJVWqXOJq"
+             data-ad-width="300"
+             data-ad-height="250"
+             style="display:none;"></ins>
     </div>
 
     <!-- 공유하기 모달 -->
@@ -324,4 +316,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-

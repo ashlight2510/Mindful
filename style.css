@@ -422,10 +422,6 @@ header h1 {
     min-height: 250px;
 }
 
-.ad-header {
-    margin-bottom: 40px;
-}
-
 .ad-footer {
     margin-top: 40px;
 }
@@ -647,4 +643,3 @@ header h1 {
         min-height: 200px;
     }
 }
-
