@@ -188,6 +188,20 @@ header h1 {
     color: var(--accent-color);
 }
 
+.more-tests-btn {
+    background: white;
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    font-weight: 500;
+    margin-bottom: 30px;
+}
+
+.more-tests-btn:hover {
+    background: var(--beige-light);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
 /* 모바일 최적화 */
 @media (max-width: 768px) {
     body {

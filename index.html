@@ -23,7 +23,7 @@
     <meta property="og:url" content="https://mind.funnyfunny.cloud/">
     <meta property="og:title" content="오늘의 마음챙김 — 하루 한 문장으로 마음 충전">
     <meta property="og:description" content="매일 한 줄의 명언으로 힐링하세요. 사랑, 관계, 삶, 감정, 동기부여 카테고리별 명언 서비스.">
-    <meta property="og:image" content="https://mind.funnyfunny.cloud/og-image.png">
+    <meta property="og:image" content="https://dummyimage.com/1200x630/1f2937/f9fafb&text=Mindful+Today">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/png">
@@ -91,6 +91,7 @@
     
     <!-- 카카오 JavaScript SDK -->
     <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <meta property="og:image:alt" content="Mindful Today" />
 </head>
 <body>
     <div class="container">
@@ -314,5 +315,37 @@
     </div>
 
     <script src="script.js"></script>
+
+    
+    <script>
+      (function () {
+        'use strict';
+        const targetUrl = 'https://funnyfunny.cloud/';
+        function addMoreTestsButton() {
+          if (document.getElementById('more-tests-btn')) return;
+          const moreBtn = document.createElement('button');
+          moreBtn.id = 'more-tests-btn';
+          moreBtn.type = 'button';
+          moreBtn.dataset.url = targetUrl;
+          moreBtn.textContent = '더 많은 테스트 해보기';
+          moreBtn.className = 'btn btn-action more-tests-btn';
+          moreBtn.addEventListener('click', function () {
+            window.open(targetUrl, '_blank', 'noopener');
+          });
+          const shareButton = document.querySelector("button#share-btn, button#shareBtn, button[id*=\"share\"]");
+          if (shareButton) {
+            shareButton.insertAdjacentElement('afterend', moreBtn);
+          } else if (document.body) {
+            document.body.appendChild(moreBtn);
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', addMoreTestsButton);
+        } else {
+          addMoreTestsButton();
+        }
+      })();
+    </script>
+
 </body>
 </html>
