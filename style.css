@@ -445,12 +445,6 @@ header h1 {
     margin-top: 40px;
 }
 
-.kakao_ad_area {
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-}
-
 /* 공유하기 모달 */
 .share-modal {
     display: none;
