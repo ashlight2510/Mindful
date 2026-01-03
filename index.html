@@ -92,6 +92,8 @@
     <!-- 카카오 JavaScript SDK -->
     <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
     <meta property="og:image:alt" content="Mindful Today" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1204894220949193"
+     crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="container">
@@ -329,6 +331,7 @@
           moreBtn.dataset.url = targetUrl;
           moreBtn.textContent = '더 많은 테스트 해보기';
           moreBtn.className = 'btn btn-action more-tests-btn';
+          moreBtn.style.cssText = 'display:block;width:100%;padding:14px 20px;background:#fff;border:1.5px solid var(--accent-color);color:var(--accent-color);font-weight:600;border-radius:8px;letter-spacing:0.3px;margin-top:12px;';
           moreBtn.addEventListener('click', function () {
             window.open(targetUrl, '_blank', 'noopener');
           });

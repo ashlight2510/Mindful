@@ -189,10 +189,15 @@ header h1 {
 }
 
 .more-tests-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
     background: white;
-    border-color: var(--accent-color);
+    border: 1.5px solid var(--accent-color);
     color: var(--accent-color);
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
     margin-bottom: 30px;
 }
 
