@@ -1027,8 +1027,9 @@ function getQuoteByMood(mood) {
 
 // 동적 SEO 메타 태그 업데이트
 function updateSEOMetaTags(quote) {
+    const t = window.t || ((key, vars = {}) => key);
     const quoteText = quote.text.length > 100 ? quote.text.substring(0, 100) + '...' : quote.text;
-    const title = `"${quoteText}" — ${quote.author} | 오늘의 마음챙김`;
+    const title = `"${quoteText}" — ${quote.author} | ${t('title')}`;
     const description = `${quoteText} — ${quote.author}. ${quote.comment}`;
     
     // 페이지 타이틀 업데이트
@@ -1122,9 +1123,11 @@ function displayQuote(quote) {
 
 // 날짜 표시
 function displayDate() {
+    const t = window.t || ((key, vars = {}) => key);
     const today = new Date();
+    const locale = window.currentLang === 'en' ? 'en-US' : 'ko-KR';
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-    const dateString = today.toLocaleDateString('ko-KR', options);
+    const dateString = today.toLocaleDateString(locale, options);
     document.getElementById('todayDate').textContent = dateString;
 }
 
@@ -1183,11 +1186,13 @@ function downloadQuoteImage() {
     });
     
     // 이미지 다운로드
+    const t = window.t || ((key, vars = {}) => key);
     canvas.toBlob(function(blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `오늘의명언_${new Date().toISOString().split('T')[0]}.png`;
+        const date = new Date().toISOString().split('T')[0];
+        a.download = t('downloadFilename', { date }).replace(/\{date\}/g, date) + '.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1217,9 +1222,10 @@ function wrapText(ctx, text, maxWidth) {
 
 // URL 복사
 function copyUrl() {
+    const t = window.t || ((key, vars = {}) => key);
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-        alert('URL이 클립보드에 복사되었습니다!');
+        alert(t('toastUrlCopied'));
     }).catch(() => {
         // 폴백: 텍스트 선택 방식
         const textArea = document.createElement('textarea');
@@ -1228,7 +1234,7 @@ function copyUrl() {
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-        alert('URL이 클립보드에 복사되었습니다!');
+        alert(t('toastUrlCopied'));
     });
 }
 
@@ -1332,11 +1338,12 @@ function createShareThumbnail(width = 1200, height = 630) {
     ctx.fillText(`— ${quote.author}`, width / 2, y);
     
     // 하단 서비스명 영역
+    const t = window.t || ((key, vars = {}) => key);
     y = cardY + cardHeight - padding - 50;
     ctx.fillStyle = '#b8b8b8';
     ctx.font = `${Math.min(width * 0.016, 20)}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText('오늘의 마음챙김', width / 2, y);
+    ctx.fillText(t('title'), width / 2, y);
     
     y += 28;
     ctx.fillStyle = '#d0d0d0';
@@ -1375,11 +1382,16 @@ function openShareModal() {
     thumbnail.style.display = 'block'; // 썸네일 표시
     
     // 공유 문구 생성
+    const t = window.t || ((key, vars = {}) => key);
     const quote = {
         text: document.getElementById('quoteText').textContent,
         author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
     };
-    const shareTextContent = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today\n${window.location.href}`;
+    const shareTextContent = t('shareTextTemplate', {
+        text: quote.text,
+        author: quote.author,
+        url: window.location.href
+    });
     shareText.textContent = shareTextContent;
     
     // Open Graph 이미지 업데이트 (Data URL은 소셜 미디어에서 작동하지 않으므로 주석 처리)
@@ -1427,6 +1439,7 @@ function initKakaoSDK() {
 
 // 카카오톡 공유
 function shareKakao() {
+    const t = window.t || ((key, vars = {}) => key);
     const quote = {
         text: document.getElementById('quoteText').textContent,
         author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
@@ -1439,8 +1452,8 @@ function shareKakao() {
             Kakao.Share.sendDefault({
                 objectType: 'feed',
                 content: {
-                    title: `"${quote.text}"`,
-                    description: `— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`,
+                    title: t('shareKakaoTitle', { text: quote.text }),
+                    description: t('shareKakaoDesc', { author: quote.author }),
                     imageUrl: '', // 이미지는 공개 서버 URL 필요
                     link: {
                         mobileWebUrl: url,
@@ -1449,7 +1462,7 @@ function shareKakao() {
                 },
                 buttons: [
                     {
-                        title: '명언 보기',
+                        title: t('shareKakaoButton'),
                         link: {
                             mobileWebUrl: url,
                             webUrl: url,
@@ -1460,13 +1473,13 @@ function shareKakao() {
         } catch (error) {
             console.error('카카오톡 공유 실패:', error);
             // 에러 발생 시 링크 공유로 대체
-            const shareText = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
+            const shareText = t('shareTextTemplate', { text: quote.text, author: quote.author, url: '' });
             const shareUrl = `https://sharer.kakao.com/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
             window.open(shareUrl, '_blank', 'width=500,height=600');
         }
     } else {
         // SDK 미지원 시 링크 공유
-        const shareText = `"${quote.text}"\n— ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
+        const shareText = t('shareTextTemplate', { text: quote.text, author: quote.author, url: '' });
         const shareUrl = `https://sharer.kakao.com/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
         window.open(shareUrl, '_blank', 'width=500,height=600');
     }
@@ -1530,18 +1543,20 @@ function shareInstagram() {
     ctx.fillText(`— ${quote.author}`, canvas.width / 2, y);
     
     // 서비스명
+    const t = window.t || ((key, vars = {}) => key);
     y = cardY + cardHeight - padding - 50;
     ctx.fillStyle = '#7f8c8d';
     ctx.font = `28px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText('Mindful Today - 오늘의 마음챙김', canvas.width / 2, y);
+    ctx.fillText(`Mindful Today - ${t('title')}`, canvas.width / 2, y);
     
     // 이미지 다운로드
     canvas.toBlob(function(blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `오늘의명언_인스타그램_${new Date().toISOString().split('T')[0]}.png`;
+        const date = new Date().toISOString().split('T')[0];
+        a.download = t('downloadFilenameInstagram', { date }).replace(/\{date\}/g, date) + '.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1551,12 +1566,13 @@ function shareInstagram() {
 
 // 트위터 공유
 function shareTwitter() {
+    const t = window.t || ((key, vars = {}) => key);
     const quote = {
         text: document.getElementById('quoteText').textContent,
         author: document.getElementById('quoteAuthor').textContent.replace('— ', '')
     };
     const url = window.location.href;
-    const text = `"${quote.text}" — ${quote.author}\n\n오늘의 마음챙김 | Mindful Today`;
+    const text = t('shareTwitterText', { text: quote.text, author: quote.author });
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=550,height=420');
 }
@@ -1570,18 +1586,19 @@ function shareFacebook() {
 
 // 공유 문구 복사
 function copyShareText() {
+    const t = window.t || ((key, vars = {}) => key);
     const shareText = document.getElementById('shareText').textContent;
     navigator.clipboard.writeText(shareText).then(() => {
         const btn = document.getElementById('copyShareText');
         const originalText = btn.textContent;
-        btn.textContent = '복사 완료!';
+        btn.textContent = t('btnCopyTextDone');
         btn.style.background = '#28a745';
         setTimeout(() => {
             btn.textContent = originalText;
             btn.style.background = '';
         }, 2000);
     }).catch(() => {
-        alert('복사에 실패했습니다. 다시 시도해주세요.');
+        alert(t('toastCopyFailed'));
     });
 }
 
@@ -1711,11 +1728,12 @@ function createDefaultOGImage() {
     ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('오늘의 마음챙김', canvas.width / 2, canvas.height / 2 - 60);
+    const t = window.t || ((key, vars = {}) => key);
+    ctx.fillText(t('title'), canvas.width / 2, canvas.height / 2 - 60);
     
     ctx.fillStyle = '#8b6f47';
     ctx.font = '32px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif';
-    ctx.fillText('하루 한 문장으로 마음 충전하세요', canvas.width / 2, canvas.height / 2 + 40);
+    ctx.fillText(t('introTitle'), canvas.width / 2, canvas.height / 2 + 40);
     
     return canvas.toDataURL('image/png');
 }
