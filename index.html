@@ -656,6 +656,8 @@
         }
         // Update dynamic content if needed
         if (window.displayDate) window.displayDate();
+        // Update current quote for new language
+        if (window.refreshCurrentQuote) window.refreshCurrentQuote();
       }
 
       document.querySelectorAll(".lang-switch button").forEach((button) => {
