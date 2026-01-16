@@ -642,6 +642,7 @@
       function setLang(lang, options = {}) {
         const nextLang = supportedLangs.includes(lang) ? lang : defaultLang;
         currentLang = nextLang;
+        // window.currentLang을 먼저 설정 (refreshCurrentQuote에서 사용)
         window.currentLang = currentLang;
         document.documentElement.lang = nextLang;
         localStorage.setItem("preferredLang", nextLang);
@@ -655,6 +656,7 @@
         // Ensure currentLang is set before calling refreshCurrentQuote
         if (window.refreshCurrentQuote) {
           // Direct call without setTimeout to ensure immediate update
+          // window.currentLang이 이미 설정되어 있으므로 즉시 반영됨
           window.refreshCurrentQuote();
         }
         if (options.updateUrl) {

@@ -1621,8 +1621,8 @@ function displayQuote(quote) {
 
 // 현재 명언 다시 표시 (언어 변경 시 호출)
 function refreshCurrentQuote() {
-    // currentQuote는 script.js의 전역 변수이므로 직접 접근
-    const quote = typeof currentQuote !== 'undefined' ? currentQuote : (window.currentQuote || null);
+    // window.currentQuote를 우선 사용 (displayQuote에서 설정됨)
+    const quote = window.currentQuote || (typeof currentQuote !== 'undefined' ? currentQuote : null);
     if (!quote) {
         // quote가 없으면 오늘의 명언을 다시 가져옴
         const randomQuote = getRandomQuote();
@@ -1630,7 +1630,7 @@ function refreshCurrentQuote() {
         return;
     }
     
-    // window.currentLang이 최신인지 확인 (직접 확인)
+    // window.currentLang이 최신인지 확인 (setLang에서 설정됨)
     // setLang에서 이미 window.currentLang을 설정했으므로 이를 우선 사용
     const lang = window.currentLang || 'ko';
     const isEn = lang === 'en';
