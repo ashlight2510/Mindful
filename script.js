@@ -1621,8 +1621,38 @@ function displayQuote(quote) {
 
 // 현재 명언 다시 표시 (언어 변경 시 호출)
 function refreshCurrentQuote() {
-    if (currentQuote || window.currentQuote) {
-        displayQuote(currentQuote || window.currentQuote);
+    const quote = currentQuote || window.currentQuote;
+    if (quote) {
+        // window.currentLang이 최신인지 확인
+        const lang = window.currentLang || 'ko';
+        const isEn = lang === 'en';
+        
+        // 언어별 텍스트 선택
+        const text = (isEn && quote.textEn) ? quote.textEn : quote.text;
+        const author = (isEn && quote.authorEn) ? quote.authorEn : quote.author;
+        const comment = (isEn && quote.commentEn) ? quote.commentEn : quote.comment;
+        
+        // 즉시 업데이트
+        const quoteTextEl = document.getElementById('quoteText');
+        const quoteAuthorEl = document.getElementById('quoteAuthor');
+        const quoteCommentEl = document.getElementById('quoteComment');
+        
+        if (quoteTextEl) quoteTextEl.textContent = text;
+        if (quoteAuthorEl) quoteAuthorEl.textContent = `— ${author}`;
+        if (quoteCommentEl) quoteCommentEl.textContent = comment;
+        
+        // SEO 메타 태그 업데이트
+        if (window.updateSEOMetaTags) {
+            window.updateSEOMetaTags({ text, author, comment, category: quote.category });
+        }
+        
+        // 애니메이션 효과
+        const card = document.getElementById('quoteCard');
+        if (card) {
+            card.classList.remove('fade-in');
+            void card.offsetWidth; // 리플로우 강제
+            card.classList.add('fade-in');
+        }
     }
 }
 
