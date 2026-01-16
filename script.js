@@ -1666,6 +1666,11 @@ function refreshCurrentQuote() {
 // 전역에서 접근 가능하도록 노출
 window.refreshCurrentQuote = refreshCurrentQuote;
 
+document.addEventListener('langchange', function () {
+    displayDate();
+    refreshCurrentQuote();
+});
+
 // 날짜 표시
 function displayDate() {
     const t = window.t || ((key, vars = {}) => key);
@@ -2366,4 +2371,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-

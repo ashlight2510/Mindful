@@ -659,6 +659,9 @@
           // window.currentLang이 이미 설정되어 있으므로 즉시 반영됨
           window.refreshCurrentQuote();
         }
+        document.dispatchEvent(
+          new CustomEvent("langchange", { detail: { lang: nextLang } })
+        );
         if (options.updateUrl) {
           const url = new URL(window.location.href);
           url.searchParams.set("lang", nextLang);
