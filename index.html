@@ -649,16 +649,20 @@
           button.classList.toggle("active", button.dataset.lang === nextLang);
         });
         applyTranslations();
+        // Update dynamic content if needed
+        if (window.displayDate) window.displayDate();
+        // Update current quote for new language - call immediately after currentLang is set
+        // Use setTimeout to ensure currentLang is fully updated
+        if (window.refreshCurrentQuote) {
+          // Ensure currentLang is set before calling refreshCurrentQuote
+          setTimeout(() => {
+            window.refreshCurrentQuote();
+          }, 0);
+        }
         if (options.updateUrl) {
           const url = new URL(window.location.href);
           url.searchParams.set("lang", nextLang);
           window.history.replaceState({}, "", url);
-        }
-        // Update dynamic content if needed
-        if (window.displayDate) window.displayDate();
-        // Update current quote for new language - call immediately after currentLang is set
-        if (window.refreshCurrentQuote) {
-          window.refreshCurrentQuote();
         }
       }
 
