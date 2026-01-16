@@ -211,11 +211,11 @@
                         기쁨을 느낄 때는 감사를 깨닫게 하는 명언을 제공합니다.
                     </p>
                     <div class="mood-buttons">
-                        <button class="btn btn-mood" data-mood="우울" data-i18n="moodSad">우울</button>
-                        <button class="btn btn-mood" data-mood="불안" data-i18n="moodAnxious">불안</button>
-                        <button class="btn btn-mood" data-mood="동기부여" data-i18n="moodMotivated">동기부여</button>
-                        <button class="btn btn-mood" data-mood="지침" data-i18n="moodGuidance">지침</button>
-                        <button class="btn btn-mood" data-mood="기쁨" data-i18n="moodHappy">기쁨</button>
+                        <button class="btn btn-mood" data-mood="sad" data-i18n="moodSad">우울</button>
+                        <button class="btn btn-mood" data-mood="anxious" data-i18n="moodAnxious">불안</button>
+                        <button class="btn btn-mood" data-mood="motivated" data-i18n="moodMotivated">동기부여</button>
+                        <button class="btn btn-mood" data-mood="guidance" data-i18n="moodGuidance">지침</button>
+                        <button class="btn btn-mood" data-mood="happy" data-i18n="moodHappy">기쁨</button>
                     </div>
                 </div>
 
@@ -540,17 +540,37 @@
 
       function applyTranslations() {
         document.title = t("metaTitle");
+        
+        // Meta description
         const descMeta = document.querySelector('meta[name="description"]');
         if (descMeta) descMeta.setAttribute("content", t("metaDescription"));
+        
+        // Meta language
+        const langMeta = document.querySelector('meta[name="language"]');
+        if (langMeta) langMeta.setAttribute("content", currentLang === "ko" ? "Korean" : "English");
+        
+        // Open Graph tags
         const ogTitleMeta = document.querySelector('meta[property="og:title"]');
         if (ogTitleMeta) ogTitleMeta.setAttribute("content", t("metaTitle"));
         const ogDescMeta = document.querySelector('meta[property="og:description"]');
         if (ogDescMeta) ogDescMeta.setAttribute("content", t("metaDescription"));
+        const ogLocaleMeta = document.querySelector('meta[property="og:locale"]');
+        if (ogLocaleMeta) ogLocaleMeta.setAttribute("content", currentLang === "ko" ? "ko_KR" : "en_US");
+        const ogImageAltMeta = document.querySelector('meta[property="og:image:alt"]');
+        if (ogImageAltMeta) ogImageAltMeta.setAttribute("content", t("title"));
+        
+        // Twitter Card tags
         const twitterTitleMeta = document.querySelector('meta[name="twitter:title"]');
         if (twitterTitleMeta) twitterTitleMeta.setAttribute("content", t("metaTitle"));
         const twitterDescMeta = document.querySelector('meta[name="twitter:description"]');
         if (twitterDescMeta) twitterDescMeta.setAttribute("content", t("metaDescription"));
+        const twitterImageAltMeta = document.querySelector('meta[name="twitter:image:alt"]');
+        if (twitterImageAltMeta) twitterImageAltMeta.setAttribute("content", t("title"));
+        
+        // HTML lang attribute
         document.documentElement.lang = currentLang;
+        
+        // Update all data-i18n attributes
         document.querySelectorAll("[data-i18n]").forEach((el) => {
           el.textContent = t(el.dataset.i18n);
         });
@@ -562,6 +582,44 @@
         });
         document.querySelectorAll("[data-i18n-alt]").forEach((el) => {
           el.setAttribute("alt", t(el.dataset.i18nAlt));
+        });
+        
+        // Update JSON-LD structured data
+        updateStructuredData();
+      }
+      
+      function updateStructuredData() {
+        // Update WebSite schema
+        let websiteScript = document.querySelector('script[type="application/ld+json"]');
+        if (websiteScript && websiteScript.textContent.includes('"@type": "WebSite"')) {
+          try {
+            const data = JSON.parse(websiteScript.textContent);
+            data.name = "Mindful Today";
+            data.alternateName = t("title");
+            data.description = t("metaDescription");
+            websiteScript.textContent = JSON.stringify(data);
+          } catch (e) {
+            console.error("Failed to update WebSite schema:", e);
+          }
+        }
+        
+        // Update CreativeWork schema
+        const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+        scripts.forEach((script) => {
+          try {
+            const data = JSON.parse(script.textContent);
+            if (data["@type"] === "CreativeWork") {
+              data.name = t("title");
+              data.description = t("metaDescription");
+              data.genre = currentLang === "ko" ? "명언, 인생철학, 동기부여" : "quotes, philosophy, motivation";
+              if (data.audience) {
+                data.audience.audienceType = currentLang === "ko" ? "일반인" : "general public";
+              }
+              script.textContent = JSON.stringify(data);
+            }
+          } catch (e) {
+            // Skip if not JSON or not CreativeWork
+          }
         });
       }
 
